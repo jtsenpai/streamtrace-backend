@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from .models import Provider
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
@@ -30,3 +31,20 @@ class MeSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username", "email", "first_name", "last_name"]
+
+
+class ProviderSerializer(serializers.ModelSerializer):
+    # Django REST Framework (DRF) serializer
+    # controls how Provider objects become JSON (and back).
+
+    class Meta:
+        model = Provider
+        field = ["id", "name", "url", "logo_url", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate_name(self, value: str):
+        # reject empty/space-only names
+        v = (value or "").strip()
+        if not v:
+            raise serializers.ValidationError("Name cannot be empty.")
+        return v
