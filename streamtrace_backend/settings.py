@@ -2,10 +2,12 @@ from datetime import timedelta
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-load_dotenv()
+from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'dev-only-please-change-me-123'
+
+load_dotenv(BASE_DIR / ".env")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY") or get_random_secret_key()
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
@@ -72,8 +74,12 @@ WSGI_APPLICATION = 'streamtrace_backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv("DB_NAME", "streamtrace"),
+        'USER': os.getenv("DB_USER", "streamuser"),
+        'PASSWORD': os.getenv("DB_PASSWORD", "streampass123"),
+        "HOST": os.getenv("DB_HOST", "127.0.0.1"),
+        "PORT": os.getenv("DB_PORT", "3306"),
     }
 }
 
