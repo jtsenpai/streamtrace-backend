@@ -1,9 +1,10 @@
 from rest_framework import generics, permissions, viewsets, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from datetime import date, timedelta
 from django.contrib.auth.models import User
-from .serializers import RegisterSerializer, MeSerializer, ProviderSerializer
-from .models import Provider
+from .serializers import RegisterSerializer, MeSerializer, ProviderSerializer, SubscriptionSerializer
+from .models import Provider, Subscription
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -42,3 +43,27 @@ class ProviderViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["name"]
     ordering_fields = ["name", "created_at"]
+
+class SubscriptionViewSet(viewsets.ModelViewSet):
+    serializer_class = SubscriptionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ["next_renewal_date","price","created_at"]
+    ordering = ["next_renewal_date"]
+
+    def get_queryset(self):
+        qs = Subscription.objects.filter(user=self.request.user).select_related("provider")
+        provider = self.request.query_params.get("provider")
+        if property:
+            qs = qs.filter(property_id=provider)
+        due_in = self.request.query_params.get("due_in_days")
+        if due_in:
+            try:
+                n = int(due_in)
+                qs = qs.filter(next_renewal_date__lte=date.today() + timedelta(days=n))
+            except ValueError:
+                pass
+        return qs
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
