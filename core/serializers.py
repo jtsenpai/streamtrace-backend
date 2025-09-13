@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Provider
+from .models import Provider, Subscription
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
@@ -48,3 +48,20 @@ class ProviderSerializer(serializers.ModelSerializer):
         if not v:
             raise serializers.ValidationError("Name cannot be empty.")
         return v
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    provider_name = serializers.CharField(source="provider.name", read_only=True)
+
+    class Meta:
+        model = Subscription
+        fields = [
+            "id","user","provider","provider_name","plan_name","price","currency",
+            "billing_cycle","custom_cycle_days","start_date","next_renewal_date",
+            "auto_renew","notes","created_at"
+        ]
+        read_only_fields = ["id", "user", "created_at"]
+
+    def validate(self, attrs):
+        if attrs.get("billing_cycle") == Subscription.CUSTOM and (attrs.get("custom_cycle_days") or 0) == 0:
+            raise serializers.ValidationError({"custom_cycle_days": "Required when billing_cycle is custom."})
+        return attrs
