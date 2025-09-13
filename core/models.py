@@ -48,8 +48,8 @@ class Subscription(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=["user", "nex_renewal_date"]),
-            models.Index(fields=["users", "provider"]),
+            models.Index(fields=["user", "next_renewal_date"]),
+            models.Index(fields=["user", "provider"]),
         ]
         ordering = ["next_renewal_date", "provider__name"]
 
