@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from datetime import data, timedelta
+from datetime import date, timedelta
 
 class TimeStamped(models.Model):
     """
