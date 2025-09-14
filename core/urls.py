@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import RegisterView, MeView, ProviderViewSet, SubscriptionViewSet
+from .views import RegisterView, MeView, ProviderViewSet, SubscriptionViewSet, DashboardSummaryView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 router = DefaultRouter()
@@ -13,5 +13,6 @@ urlpatterns = [
     path("auth/refresh", TokenRefreshView.as_view()),
     path("me", MeView.as_view()),
     path("health", lambda r: __import__("django").http.HttpResponse('{"status": "ok"}', content_type="application/json")),
+    path("dashboard/summary", DashboardSummaryView.as_view()),
     path("", include(router.urls)),
 ]
